@@ -132,8 +132,7 @@ the taxonomy came from reading a sample of 60 of those candidates.
 by me. I did **not** label a cold set of 20 unaided, so no row is marked `cold`.
 Claude wrote the labels in batches under the definitions above and marked each
 row "pre-labelled by AI (Claude), unreviewed" in the `note` column. I have not
-yet read and corrected them all. [EDIT THIS if you review some: say how many you
-read and how many you changed.] Because the 41 shortlisted `analysis`
+yet read and corrected them all. Because the 41 shortlisted `analysis`
 candidates were picked on purpose to get enough of that rare label (it was about
 7% of what Claude read), the dataset is not a random sample of r/movies: it has
 more `analysis` than the community does. Three borderline `analysis` rows were
