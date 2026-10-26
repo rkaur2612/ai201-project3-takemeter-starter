@@ -42,7 +42,11 @@
 <!-- Your community, and what your classifier sorts posts into. Three or four
      sentences. -->
 
-
+TakeMeter sorts posts and comments from r/movies by what the writer is doing:
+asking something, asserting an opinion, arguing from a checkable fact, or just
+reacting. The aim is a classifier that can tell a supported argument from an
+unsupported take in a community where both are everywhere. The text comes from
+a public Kaggle dump of r/movies from 5-15 December 2022.
 
 ---
 
@@ -54,33 +58,57 @@
      The decision rule is worth a point on its own and it's the thing most
      people leave out. Every taxonomy has a hardest boundary. Name yours. -->
 
-### `label_one`
+### `hot_take`
 
-**Definition:**
-
-**Example 1:**
->
-
-**Example 2:**
->
-
-### `label_two`
-
-**Definition:**
+**Definition:** A confident opinion or claim with no checkable support; strength of feeling or personal taste is not support.
 
 **Example 1:**
->
+> WB Discovery is such scum. Not Gunn but David Zaslav.
 
 **Example 2:**
->
+> Cause the whole DC universe has been overshadowed by the MCU for over a decade, and basically turned it into the "other"/worse superhero series.
+
+### `analysis`
+
+**Definition:** An argument where a specific, checkable fact (a film, a date, a figure, a quote) carries the point rather than decorating it.
+
+**Example 1:**
+> I would definitely not say Cavill is an A-list star. His biggest movies are: DCEU films - a poorly-received franchise where his last outing was made laughable by the CG lip debacle * Man from UNCLE - a flop ...
+
+**Example 2:**
+> Your assumption that it would be about every aspect of the western front was wrong. The book and subsequent adaptations all follow Paul during a short period of time.
+
+### `reaction`
+
+**Definition:** A quick emotional or humorous response to something just seen or read; feeling or a joke rather than an argument.
+
+**Example 1:**
+> I'm here for all the folks who like me thought you were coming for army of darkness.
+
+**Example 2:**
+> Thought they said Army of Darkness, too. I'm putting the torches and pitchforks back.
+
+### `question`
+
+**Definition:** A post whose main purpose is to ask something or request recommendations, even if it opens with an opinion.
+
+**Example 1:**
+> why wasnt jake or ryan in Never back down two?
+
+**Example 2:**
+> What website/database is the best for generating recommendations based on likes?
 
 ### The hardest boundary
 
-**Which two labels:**
+**Which two labels:** `analysis` vs `hot_take`
 
 **The decision rule I used every time:**
-<!-- e.g. "If the post names a specific checkable fact, it's `analysis`, even
-     if the tone is heated." -->
+If I can delete the checkable fact and the writer's conclusion still stands
+unchanged, it is a `hot_take` with a fact in it. If deleting the fact collapses
+the argument, it is `analysis`. Reasons based on taste ("the dialogue was
+vague") are not checkable facts. A second rule for posts that open with an
+opinion and end with "what do you think?": label by the main purpose, which
+makes it a `question`.
 
 
 
