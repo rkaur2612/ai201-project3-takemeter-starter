@@ -119,19 +119,40 @@ makes it a `question`.
 <!-- Where you collected from, how you labelled, your counts, and three hard
      cases. -->
 
-**Where the posts came from:**
+**Where the posts came from:** a public Kaggle dataset, "Reddit: /r/movies
+(Submissions & Comments)" (`thedevastator/unlocking-movie-engagements-and-insights-through`),
+not posts I collected myself. Reddit blocked my own scraper, so I downloaded
+this instead. It covers about ten days of r/movies (5-15 December 2022) and
+mixes posts and comments. `prepare_data.py` dropped removed, duplicate, very
+short (under 80 characters) and very long (over 2,500) rows, which left 1,166
+candidates in `raw_posts.csv`. I did not read the community for 20 minutes first;
+the taxonomy came from reading a sample of 60 of those candidates.
 
-**How I labelled them:** <!-- Cold first? Pre-labelled with AI and corrected?
-Say so plainly — the disclosure is required, not penalised. -->
+**How I labelled them:** every one of the 183 labels was written by Claude, not
+by me. I did **not** label a cold set of 20 unaided, so no row is marked `cold`.
+Claude wrote the labels in batches under the definitions above and marked each
+row "pre-labelled by AI (Claude), unreviewed" in the `note` column. I have not
+yet read and corrected them all. [EDIT THIS if you review some: say how many you
+read and how many you changed.] Because the 41 shortlisted `analysis`
+candidates were picked on purpose to get enough of that rare label (it was about
+7% of what Claude read), the dataset is not a random sample of r/movies: it has
+more `analysis` than the community does. Three borderline `analysis` rows were
+moved to `hot_take` on a second pass, and are marked as such. The set is 183
+rows, under the 200 the brief asks for.
 
 **Counts per label:**
 
 | Label | Count | Share |
 |---|---|---|
-|  |  |  |
-|  |  |  |
-|  |  |  |
-| **Total** |  | 100% |
+| `hot_take` | 54 | 30% |
+| `question` | 52 | 28% |
+| `reaction` | 45 | 25% |
+| `analysis` | 32 | 17% |
+| **Total** | 183 | 100% |
+
+Known weakness: almost every `question` row is a post (46 of 52) and most
+`reaction` rows are comments (37 of 45), so the model could partly be learning
+"post or comment" instead of the label.
 
 **Three hard cases**
 
@@ -139,25 +160,38 @@ Say so plainly — the disclosure is required, not penalised. -->
      been, and what you chose. These are worth more than the easy 190. -->
 
 **1.**
-> *The post:*
+> *The post:* "I think going too young with Bond is a mistake. Part of the male
+> power fantasy is that Bond ages but the Bond girls are always the same age.
+> After Connery, they've tended to cast a Bond around age 40 (like Cavill) and
+> the Bonds with staying power then moved squarely into middle age."
 >
-> *Could have been:*
+> *Could have been:* `analysis` or `hot_take`.
 >
-> *I chose, because:*
+> *I chose:* `hot_take`, because the claim about casting after Connery is
+> offered as background; delete it and "going too young is a mistake" still
+> stands. First labelled `analysis`, moved on the second pass.
 
 **2.**
-> *The post:*
+> *The post:* "The real reason Cavill will never be Bond is because he was already
+> Superman. They'll never cast someone that's already synonymous with another
+> huge franchise ... When you see a Bond actor on a poster showing off a new
+> Omega watch, they want you thinking 'that's James Bond'."
 >
-> *Could have been:*
+> *Could have been:* `hot_take` or `analysis`.
 >
-> *I chose, because:*
+> *I chose:* `hot_take`, because the Omega watch detail illustrates a prediction
+> ("never cast") that nothing checkable supports.
 
 **3.**
-> *The post:*
+> *The post:* "Has anyone else noticed the departure from Bernard's character in
+> the original Santa Clause to the way he is portrayed in the Santa Clause 2? ...
+> Tell me I'm not the only one who finds this annoying."
 >
-> *Could have been:*
+> *Could have been:* `analysis` (it contrasts two films with a quoted line) or
+> `question`.
 >
-> *I chose, because:*
+> *I chose:* `question`, because the post opens and closes by asking for
+> agreement; that is its main purpose, which is my rule for posts like this.
 
 ---
 
@@ -165,15 +199,34 @@ Say so plainly — the disclosure is required, not penalised. -->
 
 <!-- Your starting model, your settings, and anything you changed and why. -->
 
-**Base model:**
+**Base model:** `distilbert-base-uncased`
 
-**Settings:** <!-- epochs, learning rate, batch size, seed -->
+**Settings:** 10 epochs, learning rate 2e-5, batch size 16, max length 128,
+seed 42. Trained on CPU (PyTorch 2.14.1+cpu).
 
-**Anything I changed from the defaults, and why:**
+**Anything I changed from the defaults, and why:** epochs from 3 to 10, and
+`LABELS` extended to four labels. In a trial run with 3 epochs on 163 rows the
+training loss stayed near chance (1.33 against ln 4 = 1.39) and the model
+predicted `question` for every post, scoring 0.28 accuracy. With 10 epochs the
+same data reached 0.76 on that split. I changed nothing else.
 
-**Split sizes:** <!-- train / val / test, and per-label counts in the test
-split. If a label had fewer than about 8 in test, say so — it explains a lot
-of next unit's variance. -->
+**Split sizes:** train 127 / val 28 / test 28.
+
+| Label | Train | Val | Test |
+|---|---|---|---|
+| `analysis` | 22 | 5 | 5 |
+| `hot_take` | 38 | 8 | 8 |
+| `reaction` | 31 | 7 | 7 |
+| `question` | 36 | 8 | 8 |
+
+Every label has 8 or fewer in the test split (`analysis` only 5), so each label's
+F1 moves by about 0.1 or more per post. Expect large swings between seeds.
+
+**First result (seed 42):** accuracy 0.607, macro F1 0.497. F1 by label:
+`analysis` 0.00, `hot_take` 0.64, `reaction` 0.60, `question` 0.75. The model
+never predicted `analysis`; it called 4 of the 5 real `analysis` posts
+`hot_take`, which is the boundary I named as the hardest. I wrote my reading of
+these numbers only after seeing them, so it is not a prediction.
 
 
 
@@ -190,17 +243,28 @@ of next unit's variance. -->
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* to read a sample of 60 r/movies posts and propose labels.
+- *What came back:* four labels, not the three from the practice data
+  (`hot_take`, `analysis`, `reaction`), because about a third of the sample was
+  questions and requests that fit none of them, so a `question` label was added.
+  It also warned that `analysis` was rare (about 10%) and shortlisted 41 likely
+  examples.
+- *What I changed:* I accepted the four labels and the shortlist. I have not yet
+  independently checked the shortlist or the labels.
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* a quick trial run of the notebook before the real one.
+- *What came back:* with the default 3 epochs the model learned nothing (all
+  `question`, 0.28 accuracy); with 10 epochs it reached 0.76 on the trial data.
+- *What I changed:* I set `EPOCHS = 10` and recorded why, above. The real run on
+  the final 183 rows scored 0.607, so the trial number was too optimistic.
 
-**Pre-labelling disclosure:**
+**Pre-labelling disclosure:** all 183 labels were produced by Claude. I did not
+label any rows unaided and have not yet read through all of them, so none are
+marked `cold`. The `note` column in `labels.csv` says which rows Claude flagged
+as borderline. This also means my later agreement check against the staff labels
+is the only independent test of whether these labels match my own judgement.
 
 <!-- ═══════════════════════ UNIT 6 — THE TEST ═══════════════════════
 
