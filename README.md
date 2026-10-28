@@ -348,6 +348,23 @@ three-seed run.
 <!-- Five criteria across three seeds. The notebook's section 6 prints the
      spread table; the Target and Verdict columns are yours. -->
 
+Three seeds, trained on CPU (PyTorch 2.14.1+cpu), 10 epochs, test split of 28
+posts each time. Raw numbers are in `results_three_seeds_before.json`.
+
+| Measure | Seed 42 | Seed 7 | Seed 2024 | Spread |
+|---|---|---|---|---|
+| Overall accuracy | 0.607 | 0.607 | 0.571 | 0.036 |
+| Macro F1 | 0.497 | 0.571 | 0.471 | 0.101 |
+| F1 — `analysis` | 0.000 | 0.571 | 0.000 | 0.571 |
+| F1 — `hot_take` | 0.640 | 0.588 | 0.545 | 0.095 |
+| F1 — `reaction` | 0.600 | 0.364 | 0.600 | 0.236 |
+| F1 — `question` | 0.750 | 0.762 | 0.737 | 0.025 |
+
+Accuracy moved only 0.036 across the seeds (one post is 0.036), but the
+per-label F1 swings far more: `analysis` goes from 0.000 to 0.571 and back to
+0.000, and `reaction` drops to 0.364 on seed 7. With 5 to 8 test posts per
+label, one post changes a label's F1 a lot, so the per-label numbers are noisy.
+
 | Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
 |---|---|---|---|---|---|
 | 1.  |  |  |  |  |  |
@@ -361,16 +378,26 @@ three-seed run.
 <!-- ⚠️ TYPED AS A MARKDOWN TABLE. The notebook prints one ready to paste.
      An image of a matrix earns nothing. -->
 
-| true \ predicted |  |  |  |
-|---|---|---|---|
-| **** |  |  |  |
-| **** |  |  |  |
-| **** |  |  |  |
+Seed 42 (the first seed in the run), 28 test posts. Rows are the true label,
+columns are the model's guess.
+
+| true \ predicted | analysis | hot_take | reaction | question |
+|---|---|---|---|---|
+| **analysis** | 0 | 4 | 0 | 1 |
+| **hot_take** | 0 | 8 | 0 | 0 |
+| **reaction** | 0 | 3 | 3 | 1 |
+| **question** | 0 | 2 | 0 | 6 |
 
 **My biggest off-diagonal number, and what it means:**
 <!-- Not "the model made mistakes" — WHICH boundary it didn't learn, and which
      direction. "7 real analysis posts were called hot_take and only 3 went the
      other way" is a direction, not just an error rate. -->
+
+4 real `analysis` posts were called `hot_take` and 0 real `hot_take` posts were
+called `analysis`: the model never chose `analysis` on this seed, so it has not
+learned the `analysis` / `hot_take` boundary and treats `hot_take` as the
+default for anything argued. The same pattern is why `hot_take` gets a perfect
+8 of 8 here while absorbing 3 `reaction`, 2 `question` and 4 `analysis` posts.
 
 
 
