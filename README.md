@@ -288,6 +288,18 @@ is the only independent test of whether these labels match my own judgement.
 <!-- Milestone 1 asks you to write this BEFORE seeing the trained numbers. A
      prediction made afterwards isn't one. -->
 
+I expect the trained model to beat the baseline most on `hot_take` and
+`reaction`, because the zero-shot model only sees my one-sentence definitions
+and cannot learn the tone of r/movies, and to be closest to the baseline on
+`question`, which a general model can spot from the wording alone; I expect both
+to do badly on `analysis`, because telling whether a fact carries the argument is
+the boundary I labelled least consistently.
+
+*How this was written:* Claude drafted this sentence at my request, before
+`baseline.py` had been run, so it is a genuine prediction about the baseline
+numbers. It is not blind about the trained model: I had already seen its first
+result (0.607 accuracy, `analysis` F1 0.00) from the previous unit.
+
 **What the gap actually means:**
 <!-- If the baseline matched your trained model, your fine-tuning added
      nothing — and that is a real finding, not a failure. Say it plainly. -->
