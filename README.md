@@ -277,12 +277,23 @@ is the only independent test of whether these labels match my own judgement.
 <!-- Both models on the same posts. `python baseline.py --trained results.json`
      prints this table for you. -->
 
-| Measure | Baseline | Trained | Difference |
-|---|---|---|---|
-| Overall accuracy |  |  |  |
-| Macro F1 |  |  |  |
-| F1 — `label_one` |  |  |  |
-| F1 — `label_two` |  |  |  |
+All three columns are scored on the same 28 posts in `test_split.csv` (seed 42).
+"Baseline (definitions)" is `bart-large-mnli` given my four label definitions
+from `label_definitions.txt`. "Baseline (bare names)" is the same model given
+only the label names, because that file was set aside on purpose for a second
+run. "Trained" is my fine-tuned DistilBERT from `results.json`.
+
+| Measure | Baseline (definitions) | Baseline (bare names) | Trained | Trained minus definitions | Trained minus bare names |
+|---|---|---|---|---|---|
+| Overall accuracy | 0.250 | 0.643 | 0.607 | +0.357 | -0.036 |
+| Macro F1 | 0.225 | 0.587 | 0.497 | +0.273 | -0.090 |
+| F1 — `analysis` | 0.300 | 0.333 | 0.000 | -0.300 | -0.333 |
+| F1 — `hot_take` | 0.000 | 0.500 | 0.640 | +0.640 | +0.140 |
+| F1 — `question` | 0.200 | 0.889 | 0.750 | +0.550 | -0.139 |
+| F1 — `reaction` | 0.400 | 0.625 | 0.600 | +0.200 | -0.025 |
+
+The files are `baseline_results.json` (definitions, with the trained numbers
+added) and `baseline_bare_names.json` (bare names).
 
 **What I predicted before I looked:**
 <!-- Milestone 1 asks you to write this BEFORE seeing the trained numbers. A
@@ -303,6 +314,30 @@ result (0.607 accuracy, `analysis` F1 0.00) from the previous unit.
 **What the gap actually means:**
 <!-- If the baseline matched your trained model, your fine-tuning added
      nothing — and that is a real finding, not a failure. Say it plainly. -->
+
+My prediction above was wrong in two places. I expected `question` to be the
+baseline's best label, and with my definitions it scored only 0.20. I also
+expected both models to fail on `analysis`; the baseline reached 0.30 and 0.33
+there while the trained model scored 0.00.
+
+The comparison depends on which baseline I use. Against the baseline with my
+definitions the trained model wins by 36 points of accuracy (0.607 against
+0.250, which is chance for four labels). Against the same model given only the
+bare label names, the trained model does not win: 0.607 against 0.643 is a
+difference of one post out of 28. The trained model beats the bare-names
+baseline on `hot_take` only; it is behind on `analysis`, `question` and
+`reaction`.
+
+So on this test split my fine-tuning has not been shown to add anything over a
+general model with a simple prompt. The likely reason my definitions made the
+baseline worse is that `baseline.py` slots each definition into the sentence
+"This post is {}." and my definitions are long sentences with semicolons and
+examples, which the entailment model handles badly. I have not tested that
+explanation. The definitions-based number is the one my criterion 3 names, so
+that is the one I report as "the baseline", but I am showing both, and the
+bare-names run is the stronger opponent. With 28 test posts one post moves
+accuracy by about 3.6 points, so none of these gaps is firm until the
+three-seed run.
 
 
 
